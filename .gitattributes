@@ -1,0 +1,6 @@
+# Ensure bash scripts and systemd units always use LF newlines
+* text=auto
+*.sh text eol=lf
+claude text eol=lf
+*.service text eol=lf
+*.md text eol=lf

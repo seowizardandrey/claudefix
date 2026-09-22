@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*"
+           Name="Claude Code Proxy"
+           Language="1033"
+           Version="2.1.0"
+           Manufacturer="Andrey Sokolov"
+           UpgradeCode="B95A21D1-74B0-4C3D-8BC3-9C1D7150A6E2">
+
+    <Package InstallerVersion="300"
+             Compressed="yes"
+             InstallScope="perMachine"
+             Description="Claude Code Proxy &amp; Auto-Patcher for Windows (https://github.com/seowizardandrey/claudefix)"
+             Comments="Claude Code Proxy by Andrey Sokolov (seowizard.andrey@gmail.com)"
+             Manufacturer="Andrey Sokolov" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of Claude Code Proxy is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Application Icon & Add/Remove Programs Metadata -->
+    <Icon Id="AppIcon.ico" SourceFile="app.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.ico" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/seowizardandrey/claudefix" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/seowizardandrey/claudefix" />
+    <Property Id="ARPURLUPDATEINFO" Value="https://github.com/seowizardandrey/claudefix" />
+    <Property Id="ARPCONTACT" Value="seowizard.andrey@gmail.com" />
+
+    <!-- Directory Structure -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="INSTALLFOLDER" Name="Claude Code Proxy" />
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="Claude Code Proxy" />
+      </Directory>
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+
+    <!-- Components and Files -->
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="C_ClaudeProxyPatcher" Guid="D48B315F-2A99-4781-B129-C59821EA9B01">
+        <File Id="ClaudeProxyPatcher.exe" Source="ClaudeProxyPatcher.exe" KeyPath="yes">
+          <Shortcut Id="DesktopShortcut"
+                    Directory="DesktopFolder"
+                    Name="Claude Proxy Manager"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="AppIcon.ico"
+                    Advertise="yes" />
+          <Shortcut Id="StartMenuShortcut"
+                    Directory="ApplicationProgramsFolder"
+                    Name="Claude Proxy Manager"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="AppIcon.ico"
+                    Advertise="yes" />
+        </File>
+      </Component>
+
+      <Component Id="C_SetupExe" Guid="9F2624D0-377D-4F71-8DC1-58A246CF7302">
+        <File Id="setup.exe" Source="setup.exe" KeyPath="yes">
+          <Shortcut Id="StartMenuSetup"
+                    Directory="ApplicationProgramsFolder"
+                    Name="Claude Proxy Setup"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="AppIcon.ico"
+                    Advertise="yes" />
+        </File>
+      </Component>
+
+      <Component Id="C_GostExe" Guid="E64E3F3B-C998-4B52-8CF2-4CE115EA3903">
+        <File Id="gost.exe" Source="gost.exe" KeyPath="yes" />
+      </Component>
+
+      <Component Id="C_ClaudeWrapperExe" Guid="475A7B70-5F11-479C-9C21-6A26B3353804">
+        <File Id="claude_wrapper.exe" Source="claude_wrapper.exe" KeyPath="yes" />
+      </Component>
+
+      <Component Id="C_AppIcon" Guid="85A1D20B-3066-4F25-A673-B561C68E6805">
+        <File Id="app.ico" Source="app.ico" KeyPath="yes" />
+      </Component>
+
+      <Component Id="C_BypassConf" Guid="C19F9507-62B3-4B93-94DC-866DEAA58806">
+        <File Id="bypass.conf" Source="bypass.conf" KeyPath="yes" />
+      </Component>
+
+      <Component Id="C_CertFile" Guid="72448372-FF88-46E0-B955-46F54D7D2807">
+        <File Id="ClaudeProxy.cer" Source="ClaudeProxy.cer" KeyPath="yes" />
+      </Component>
+
+      <Component Id="C_CmdScripts" Guid="53E471FA-CE6C-4963-885E-099F8D69A508">
+        <File Id="patch.cmd" Source="patch.cmd" KeyPath="yes" />
+        <File Id="status.cmd" Source="status.cmd" />
+        <File Id="start.cmd" Source="start.cmd" />
+        <File Id="stop.cmd" Source="stop.cmd" />
+        <File Id="uninstall.cmd" Source="uninstall.cmd" />
+        <File Id="trust_cert.cmd" Source="trust_cert.cmd" />
+        <File Id="install.cmd" Source="install.cmd" />
+      </Component>
+
+      <!-- Add Install Folder to System PATH -->
+      <Component Id="C_SystemPath" Guid="36353E77-4C0E-4FBD-A66E-CF575E7EA209">
+        <CreateFolder />
+        <Environment Id="PATH" Name="PATH" Value="[INSTALLFOLDER]" Permanent="no" Part="last" Action="set" System="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <!-- Start Menu Directory Cleanup on Uninstall -->
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="C_StartMenuDir" Guid="41824DA4-B321-4E15-BA55-081EE038F310">
+        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\AndreySokolov\ClaudeCodeProxy" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <!-- Features -->
+    <Feature Id="CompleteFeature" Title="Claude Code Proxy" Level="1" Display="expand">
+      <ComponentRef Id="C_ClaudeProxyPatcher" />
+      <ComponentRef Id="C_SetupExe" />
+      <ComponentRef Id="C_GostExe" />
+      <ComponentRef Id="C_ClaudeWrapperExe" />
+      <ComponentRef Id="C_AppIcon" />
+      <ComponentRef Id="C_BypassConf" />
+      <ComponentRef Id="C_CertFile" />
+      <ComponentRef Id="C_CmdScripts" />
+      <ComponentRef Id="C_SystemPath" />
+      <ComponentRef Id="C_StartMenuDir" />
+    </Feature>
+
+    <!-- Standard WixUI Interface -->
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <UIRef Id="WixUI_InstallDir" />
+    <UIRef Id="WixUI_ErrorProgressText" />
+
+  </Product>
+</Wix>
